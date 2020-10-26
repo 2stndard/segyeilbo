@@ -19,10 +19,11 @@ segye.data$std <- as.numeric(sub(",", "", segye.data$std, fixed = TRUE))
 
 
 View(segye.data)
+class(segye.data)
 
 segye.data %>%
-  group_by(year, kind) %>%
-  summarise(std.per.sch = mean(std, na.rm = T)) %>% as.data.frame() %>%
+  group_by(kind, year) %>%
+  summarise(std.per.sch = mean(std, na.rm = T)) %>% 
   plot_ly(x = ~ year, y = ~std.per.sch) %>%
   add_trace(type = 'scatter', mode = 'markers+lines', name = ~kind, color = ~kind, colors = 'Dark2') %>%
   add_trace(type = 'scatter', mode = 'text', text = ~round(std.per.sch, 1), textposition = "top", showlegend = F) %>%

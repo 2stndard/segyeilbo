@@ -1,4 +1,4 @@
-segye.data<- read.csv('D:/R/data/general analysis.csv', stringsAsFactors = F)
+segye.data<- read.csv('c:/R/data/general analysis1.csv', stringsAsFactors = F)
 glimpse(segye.data)
 
 segye.data$year <- as.factor(substr(segye.data$year, 1, 4))
@@ -18,7 +18,7 @@ segye.data$scale <- factor(segye.data$scale, levels = c('특별/광역시', '시
 segye.data$std <- as.numeric(sub(",", "", segye.data$std, fixed = TRUE))
 
 
-View(segye.data)
+summary(segye.data)
 class(segye.data)
 
 segye.data %>%
@@ -378,17 +378,25 @@ df.temp %>%
 
 segye.data %>%
   group_by(kind, year) %>%
-  summarise(n.cls = sum(class, na.rm = T)) %>% 
-plot_ly(x = ~ year, y = ~n.cls) %>%
-  add_trace(type = 'scatter', mode = 'markers+lines', name = ~kind, color = ~kind, colors = 'Dark2') %>%
-  add_trace(type = 'scatter', mode = 'text', text = ~(scales::number_format(big.mark = ',')(n.cls)), textposition = "top", showlegend = F) %>%
+  summarise(n.cls = sum(class, na.rm = T), 
+            n.teacher = sum(teacher, na.rm = T), 
+            n.std = sum(std, na.rm = T)) %>% 
+plot_ly(x = ~ year, y = ~n.cls, colors = 'Dark2') %>%
+  add_trace(type = 'bar', y = ~n.teacher, color = ~kind, name = '교원수', showlegend = F) %>%
+  add_trace(type = 'scatter', mode = 'markers+lines', name = ~kind, color = ~kind, yaxis = 'y2') %>%
+  add_trace(type = 'scatter', mode = 'text', text = ~(scales::number_format(big.mark = ',')(n.cls)), textposition = "top", showlegend = F, yaxis = 'y2') %>%
   layout(xaxis = list(title = list(text ='연도', 
                                    standoff = 5, 
                                    font = list(color = 'black')
                                    )
                       ), 
-         yaxis = list(title = '학급수(개)', 
-                      rangebreaks = list(values = c(50000, 70000, 110000, 130000)) ), 
+         yaxis = list(title = '학급수(개)'),
+         yaxis2 = list(showticklabels = TRUE,
+                       overlaying = "y",
+                       side = "right",
+                       title = "교원수(명)",
+                       automargin = T # This do the trick
+                       ),
   title = list(text = '연도별 학급수 추이', 
                font = list(size = 30, 
                            color = toRGB('black')
@@ -401,10 +409,9 @@ plot_ly(x = ~ year, y = ~n.cls) %>%
     title = list(
       text = '학교급'
     ), 
-    traceorder = 'reversed', 
-    y = 0.5
+    traceorder = 'reversed', x = 1.1, y = 0.5
   ),
   paper_bgcolor = '#d5e4eb',
   plot_bgcolor =  '#d5e4eb', 
-  margin = list(t=50)
+  margin = list(t = 50)
   )

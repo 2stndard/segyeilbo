@@ -45,6 +45,7 @@ segye.data %>%
     title = list(
       text = '학교급'
     ), 
+    traceorder = 'reversed', 
     y = 0.5
   ),
   paper_bgcolor = '#d5e4eb',
@@ -78,6 +79,7 @@ segye.data %>%
     title = list(
       text = '지역규모'
     ), 
+    traceorder = 'reversed', 
     y = 0.5
   ),
   paper_bgcolor = '#d5e4eb',
@@ -283,7 +285,7 @@ segye.data %>%
   )
 
 
-####################  학생수
+####################  연도별 예상 고3 학생수
 df.temp <- segye.data %>%
   filter(kind == '초등학교') %>%
   group_by(year, kind) %>%
@@ -322,6 +324,87 @@ df.temp <- df.temp %>% gather(key = adm.year, value = adm.num, 2:13) %>% filter(
 
 df.temp %>%
   plot_ly(y = ~adm.num, x = ~adm.year) %>%
-  add_trace(type = 'bar', name = '연도별 고3학생수') %>%
-  add_trace(y = 533492, type = 'scatter', mode = 'lines', name = '19년도 입학정원<br>533,492명') %>%
-  add_trace(type = 'scatter', mode = 'text', text = ~(scales::number_format(big.mark = ',')(adm.num)), textposition = "top", showlegend = F)
+  add_bars(name = '연도별 고3학생수') %>%
+  add_lines(y = 533492, name = '19년도 입학정원') %>%
+  add_lines(y = 221742, name = '19년도 입학정원(수도권)', 
+            line = list(shape = 'hv')
+            ) %>%
+  add_text(text = ~(scales::number_format(big.mark = ',')(adm.num)), textposition = "top", showlegend = F, 
+           textfont = list(size = 9)) %>%
+  layout(annotations = list(x = 2031, 
+                           y = 533492, 
+                           text = '533,492',
+                           showarrow = T, 
+                           showahead = 7, 
+                           ax = 45,
+                           ay = 25),
+         yaxis = list(
+           title = '학생수'
+         ),
+         xaxis = list(
+           title = '연도'
+         ), 
+         title = list(text = '연도별 예상 고3학생수', 
+                      font = list(size = 30, 
+                                  color = toRGB('black')
+                      ), 
+                      x = 0, 
+                      y = 0.97, 
+                      xref = 'paper'
+         )
+  ) %>%
+  layout(annotations = list(x = 2031, 
+                            y = 221742, 
+                            text = '221,742',
+                            showarrow = T, 
+                            showahead = 7, 
+                            ax = 45,
+                            ay = 25)
+  ) %>%
+  layout(annotations = 
+           list(x = 0, y = 1.01, text = "2020년 초1~고3학생들이 중도탈락없이 진급함을 전제하며 입학정원은 전문대, 대학을 포함함", 
+                showarrow = F, xref='paper', yref='paper', 
+                xanchor='left', yanchor='top', xshift=0, yshift=0,
+                font=list(size=10, color="red"))
+  ) %>%
+  layout(margin = list(
+    t = 50
+    )
+  )
+  
+
+
+####################  학급수
+
+segye.data %>%
+  group_by(kind, year) %>%
+  summarise(n.cls = sum(class, na.rm = T)) %>% 
+plot_ly(x = ~ year, y = ~n.cls) %>%
+  add_trace(type = 'scatter', mode = 'markers+lines', name = ~kind, color = ~kind, colors = 'Dark2') %>%
+  add_trace(type = 'scatter', mode = 'text', text = ~(scales::number_format(big.mark = ',')(n.cls)), textposition = "top", showlegend = F) %>%
+  layout(xaxis = list(title = list(text ='연도', 
+                                   standoff = 5, 
+                                   font = list(color = 'black')
+                                   )
+                      ), 
+         yaxis = list(title = '학급수(개)', 
+                      rangebreaks = list(values = c(50000, 70000, 110000, 130000)) ), 
+  title = list(text = '연도별 학급수 추이', 
+               font = list(size = 30, 
+                           color = toRGB('black')
+               ), 
+               x = 0, 
+               y = 0.97, 
+               xref = 'paper'
+  ),
+  legend = list(
+    title = list(
+      text = '학교급'
+    ), 
+    traceorder = 'reversed', 
+    y = 0.5
+  ),
+  paper_bgcolor = '#d5e4eb',
+  plot_bgcolor =  '#d5e4eb', 
+  margin = list(t=50)
+  )

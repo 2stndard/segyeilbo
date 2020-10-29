@@ -321,10 +321,18 @@ colnames(df.temp) <- c('year', as.character(2020:2031))
 
 df.temp <- df.temp %>% gather(key = adm.year, value = adm.num, 2:13) %>% filter(year == 2020)
 
+k12.std <- read.table('clipboard', sep = '\t')
+
+colnames(k12.std) <- c('adm.year', 'adm.num')
+
+rbind(df.temp, cbind(year = '2020', k12.std[, 1:2])) %>% arrange(adm.year) -> df.temp
+
+factor(df.temp$adm.year)
 
 df.temp %>%
   plot_ly(y = ~adm.num, x = ~adm.year) %>%
-  add_bars(name = '연도별 고3학생수') %>%
+  add_bars(data = df.temp %>% filter(adm.year <= 2019), name = '연도별 고3학생수(실측)') %>%
+  add_bars(data = df.temp %>% filter(adm.year > 2019), name = '연도별 고3학생수(예상)') %>%
   add_lines(y = 533492, name = '19년도 입학정원') %>%
   add_lines(y = 221742, name = '19년도 입학정원(수도권)', 
             line = list(shape = 'hv')
@@ -368,8 +376,10 @@ df.temp %>%
                 font=list(size=10, color="red"))
   ) %>%
   layout(margin = list(
-    t = 50
-    )
+    t = 50, automargin = T
+    ), 
+    legend = list(orientation = 'h', xanchor = 'left', y = -0.15), 
+    autosize = T
   )
   
 
@@ -415,3 +425,10 @@ plot_ly(x = ~ year, colors = 'Dark2') %>%
   plot_bgcolor =  '#d5e4eb', 
   margin = list(t = 50)
   )
+
+
+k12.std <- read.table('clipboard', sep = '\t')
+
+colnames(k12.std) <- c('adm.year', 'adm.num')
+
+rbind(df.temp, cbind(year = '2020', k12.std[, 1:2])) %>% arrange(adm.year) -> df.temp

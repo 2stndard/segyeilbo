@@ -327,18 +327,46 @@ colnames(k12.std) <- c('adm.year', 'adm.num')
 
 rbind(df.temp, cbind(year = '2020', k12.std[, 1:2])) %>% arrange(adm.year) -> df.temp
 
-factor(df.temp$adm.year)
+highedu.personnel <- read.table('clipboard', sep = '\t')
 
-df.temp %>%
+highedu.personnel$year <- seq(from = 2018, to = 2011, by = -1)
+
+colnames(highedu.personnel) <- c('total.personnel', 'metro.personnel', 'year')
+
+highedu.personnel$year <- as.factor(highedu.personnel$year)
+
+df.temp %>% 
   plot_ly(y = ~adm.num, x = ~adm.year) %>%
-  add_bars(data = df.temp %>% filter(adm.year <= 2019), name = '연도별 고3학생수(실측)') %>%
-  add_bars(data = df.temp %>% filter(adm.year > 2019), name = '연도별 고3학생수(예상)') %>%
-  add_lines(y = 533492, name = '19년도 입학정원') %>%
-  add_lines(y = 221742, name = '19년도 입학정원(수도권)', 
+  add_bars(data = df.temp %>% filter(adm.year <= 2019, adm.year > 2010), name = '연도별 고3학생수(실측)') %>%
+  add_bars(data = df.temp %>% filter(adm.year > 2019, adm.year > 2010), name = '연도별 고3학생수(예상)') %>%
+  add_lines(data = df.temp %>% filter(adm.year >= 2019), y = 533492, name = '19년도 입학정원') %>%
+  add_lines(data = df.temp %>% filter(adm.year >= 2019),y = 221742, name = '19년도 입학정원(수도권)', 
             line = list(shape = 'hv')
             ) %>%
   add_text(text = ~(scales::number_format(big.mark = ',')(adm.num)), textposition = "top", showlegend = F, 
            textfont = list(size = 9)) %>%
+  add_markers(data = highedu.personnel, 
+              y = ~total.personnel, 
+              x = ~year, 
+              name = '전체입학정원',
+              marker = list(symbol = 'square', 
+                            color = toRGB('white'), 
+                            line = list(color = '#1F77B4', 
+                                        width = 1
+                                        )
+                            )
+              ) %>%
+  add_markers(data = highedu.personnel, 
+              y = ~metro.personnel, 
+              x = ~year, 
+              name = '수도권입학정원',
+              marker = list(symbol = 'diamond', 
+                            color = toRGB('white'), 
+                            line = list(color = '#1F77B4', 
+                                        width = 1
+                            )
+              )
+  ) %>%
   layout(annotations = list(x = 2031, 
                            y = 533492, 
                            text = '533,492',
@@ -370,7 +398,7 @@ df.temp %>%
                             ay = 25)
   ) %>%
   layout(annotations = 
-           list(x = 0, y = 1.01, text = "2020년 초1~고3학생들이 중도탈락없이 진급함을 전제하며 입학정원은 전문대, 대학을 포함함", 
+           list(x = 0, y = 1.01, text = "2020년 초1~고3학생들이 중도탈락없이 진급함을 전제하며 입학정원은 전문대, 대학을 포함하나 방통대는 제외", 
                 showarrow = F, xref='paper', yref='paper', 
                 xanchor='left', yanchor='top', xshift=0, yshift=0,
                 font=list(size=10, color="red"))
@@ -378,7 +406,7 @@ df.temp %>%
   layout(margin = list(
     t = 50, automargin = T
     ), 
-    legend = list(orientation = 'h', xanchor = 'left', y = -0.15), 
+    legend = list(orientation = "h",  xanchor = "center", yanchor = 'bottom', x = 0.5, y = -0.3), 
     autosize = T
   )
   
@@ -427,8 +455,3 @@ plot_ly(x = ~ year, colors = 'Dark2') %>%
   )
 
 
-k12.std <- read.table('clipboard', sep = '\t')
-
-colnames(k12.std) <- c('adm.year', 'adm.num')
-
-rbind(df.temp, cbind(year = '2020', k12.std[, 1:2])) %>% arrange(adm.year) -> df.temp

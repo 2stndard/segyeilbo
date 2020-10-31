@@ -1,4 +1,4 @@
-segye.data<- read.csv('c:/R/data/general analysis1.csv', stringsAsFactors = F)
+segye.data<- read.csv('c:/R/data/general analysis.csv', stringsAsFactors = F)
 glimpse(segye.data)
 
 segye.data$year <- as.factor(substr(segye.data$year, 1, 4))
@@ -255,7 +255,7 @@ segye.data %>%
   ####################  학교수
 segye.data %>%
   group_by(year, kind) %>%
-  summarise(n.sch = n()) %>% as.data.frame() %>% write.table('clipboard', sep = '\t')
+  summarise(n.sch = n()) %>% as.data.frame() %>% #write.table('clipboard', sep = '\t')
   plot_ly(x = ~ year, y = ~n.sch) %>%
   add_trace(type = 'scatter', mode = 'markers+lines', name = ~kind, color = ~kind, colors = 'Dark2') %>%
   add_trace(type = 'scatter', mode = 'text', text = ~n.sch, textposition = "top", showlegend = F) %>%
@@ -337,14 +337,22 @@ highedu.personnel$year <- as.factor(highedu.personnel$year)
 
 df.temp %>% 
   plot_ly(y = ~adm.num, x = ~adm.year) %>%
-  add_bars(data = df.temp %>% filter(adm.year <= 2019, adm.year > 2010), name = '연도별 고3학생수(실측)') %>%
-  add_bars(data = df.temp %>% filter(adm.year > 2019, adm.year > 2010), name = '연도별 고3학생수(예상)') %>%
-  add_lines(data = df.temp %>% filter(adm.year >= 2019), y = 533492, name = '19년도 입학정원') %>%
-  add_lines(data = df.temp %>% filter(adm.year >= 2019),y = 221742, name = '19년도 입학정원(수도권)', 
+  add_bars(data = df.temp %>% filter(adm.year <= 2019, adm.year > 2010), 
+           name = '연도별 고3학생수(실측)') %>%
+  add_bars(data = df.temp %>% filter(adm.year > 2019, adm.year > 2010), 
+           name = '연도별 고3학생수(예상)') %>%
+  add_lines(data = df.temp %>% filter(adm.year >= 2019), 
+            y = 533492, 
+            name = '19년도 입학정원') %>%
+  add_lines(data = df.temp %>% filter(adm.year >= 2019),
+            y = 221742, 
+            name = '19년도 입학정원(수도권)', 
             line = list(shape = 'hv')
             ) %>%
-  add_text(text = ~(scales::number_format(big.mark = ',')(adm.num)), textposition = "top", showlegend = F, 
-           textfont = list(size = 9)) %>%
+  add_text(text = ~(scales::number_format(big.mark = ',')(adm.num)), 
+           textposition = "top", showlegend = F, 
+           textfont = list(size = 9)
+           ) %>%
   add_markers(data = highedu.personnel, 
               y = ~total.personnel, 
               x = ~year, 
@@ -356,6 +364,15 @@ df.temp %>%
                                         )
                             )
               ) %>%
+  add_text(data = highedu.personnel, 
+           y = ~total.personnel-20000, 
+           x = ~year, 
+           name = '전체입학정원수',
+           text = ~(scales::number_format(big.mark = ',')(total.personnel)),
+           textposition = "bottom center", 
+           showlegend = F, 
+           textfont = list(size = 9)
+           ) %>%
   add_markers(data = highedu.personnel, 
               y = ~metro.personnel, 
               x = ~year, 
@@ -366,6 +383,15 @@ df.temp %>%
                                         width = 1
                             )
               )
+  ) %>%
+  add_text(data = highedu.personnel, 
+           y = ~metro.personnel-20000, 
+           x = ~year, 
+           name = '수도권입학정원수',
+           text = ~(scales::number_format(big.mark = ',')(metro.personnel)),
+           textposition = "bottom center",
+           showlegend = F, 
+           textfont = list(size = 9)
   ) %>%
   layout(annotations = list(x = 2031, 
                            y = 533492, 
@@ -420,10 +446,34 @@ segye.data %>%
   summarise(n.cls = sum(class, na.rm = T), 
             n.teacher = sum(teacher, na.rm = T), 
             n.std = sum(std, na.rm = T)) %>% 
-plot_ly(x = ~ year, colors = 'Dark2') %>%
-  add_trace(type = 'bar', y = ~n.teacher, color = ~kind, name = ~kind, showlegend = T, opacity = 0.5, legendgroup = '교원수') %>%
-  add_trace(type = 'scatter', y = ~n.cls, mode = 'markers+lines', name = ~kind, color = ~kind, yaxis = 'y2', legendgroup = '학급수') %>%
-  add_trace(type = 'scatter', mode = 'text', y = ~n.cls, text = ~(scales::number_format(big.mark = ',')(n.cls)), textposition = "top", showlegend = F, yaxis = 'y2') %>%
+  plot_ly(x = ~ year, colors = 'Dark2') %>%
+  add_trace(type = 'bar', 
+            y = ~n.teacher, 
+            color = ~kind, 
+            name = ~kind, 
+            text =  ~n.teacher,
+            textposition = "auto",            
+            showlegend = T, 
+            opacity = 0.5, 
+            legendgroup = '교원수'
+            ) %>%
+  add_trace(type = 'scatter', 
+            y = ~n.cls, 
+            mode = 'markers+lines+text', 
+            name = ~kind, 
+            color = ~kind, 
+            text = ~(scales::number_format(big.mark = ',')(n.cls)),
+            yaxis = 'y2', 
+            textposition = "bottom center"
+            ) %>%
+#  add_trace(type = 'scatter', 
+#            mode = 'text', 
+#            y = ~n.cls, 
+#            text = ~(scales::number_format(big.mark = ',')(n.cls)), 
+#            textposition = "top", 
+#            showlegend = F, 
+#            yaxis = 'y2'
+#            ) %>%
   layout(xaxis = list(title = list(text ='연도', 
                                    standoff = 5, 
                                    font = list(color = 'black')
